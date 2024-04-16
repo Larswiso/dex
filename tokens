@@ -1,0 +1,60 @@
+import os
+import time
+from urllib.parse import urlparse
+
+import pyautogui
+import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+
+
+
+    
+
+
+
+options = Options()
+options.add_experimental_option("detach", True)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), 
+                          options=options)
+
+driver.get("https://www.google.de/?hl=de")
+driver.maximize_window
+time.sleep(3)
+pyautogui.hotkey("ctrl","t")
+time.sleep(0.4)
+pyautogui.typewrite("https://dexscreener.com/new-pairs?rankBy=pairAge&order=asc&chainIds=solana&minLiq=1000&maxAge=2&min6HChg=50&min5MChg=1")
+pyautogui.press("enter")
+time.sleep(7)
+alle_tabs = driver.window_handles
+
+driver.switch_to.window(alle_tabs[1])
+time.sleep(5)
+html = driver.page_source
+
+
+with open("page_source.html", "w", encoding='utf-8') as f:
+    f.write(driver.page_source)
+
+
+text = html.split('{pairAddress}')[0]
+with open("page_source1.html", "w", encoding='utf-8') as f:
+    f.write(text)
+
+addresses = []
+start_index = 0
+
+# Solange 'pairAddress' im Text ab dem start_index gefunden wird
+while 'pairAddress' in text[start_index:]:
+    # Finde die Startposition von 'pairAddress'
+    start_pos = text.find('pairAddress', start_index) + len('pairAddress') + 3
+    # Extrahiere die nächsten 44 Zeichen
+    address = text[start_pos:start_pos+44]
+    addresses.append(address)
+    # Aktualisiere den start_index für die nächste Suche
+    start_index = start_pos + 44
+
+print(addresses)
